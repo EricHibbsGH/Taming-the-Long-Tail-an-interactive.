@@ -95,18 +95,25 @@ function drawPane(canvasId, state, isTLT) {
 
   var reqs = state.reqs, n = reqs.length;
   if (n === 0) return;
-  var padL = 42, padR = 8, padT = 8, padB = 30;
+  var padL = 42, padR = 8, padT = 10, padB = 32;
   var plotW = W - padL - padR, plotH = H - padT - padB;
-  var barH = Math.min(5, (plotH) / n);
-  var gap = Math.max(0.3, (plotH - n * barH) / (n + 1));
+  if (plotH < 10 || plotW < 10) return;
+
+  /* Compute bar sizing to strictly fit within plotH */
+  var gapRatio = 0.2; /* gap is 20% of bar height */
+  /* barH * n + gapRatio * barH * (n + 1) = plotH */
+  var barH = plotH / (n + gapRatio * (n + 1));
+  var gap = barH * gapRatio;
+  /* Clamp bar size for readability */
+  if (barH > 6) { barH = 6; gap = Math.max(0.5, (plotH - n * barH) / (n + 1)); }
+  if (barH < 0.5) barH = 0.5;
+  if (gap < 0) gap = 0;
 
   /* Axis lines */
-  ctx.strokeStyle = '#2e3444';
+  ctx.strokeStyle = '#3a4050';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  /* X-axis (bottom) */
   ctx.moveTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH);
-  /* Y-axis (left) */
   ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH);
   ctx.stroke();
 
@@ -120,6 +127,12 @@ function drawPane(canvasId, state, isTLT) {
   ctx.fillText('REQUESTS (sorted by length)', 0, 0);
   ctx.restore();
 
+  /* Clip drawing to the plot area so nothing overflows past axes */
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(padL, padT, plotW, plotH);
+  ctx.clip();
+
   /* Threshold line for TLT */
   if (isTLT) {
     var thIdx = n - SIM.cfg.thresh;
@@ -129,12 +142,12 @@ function drawPane(canvasId, state, isTLT) {
       ctx.strokeStyle = C.purple;
       ctx.setLineDash([3, 3]);
       ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(padL, thY); ctx.lineTo(W - padR, thY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(padL, thY); ctx.lineTo(padL + plotW, thY); ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = C.purple2;
       ctx.font = '9px JetBrains Mono';
       ctx.textAlign = 'right';
-      ctx.fillText('SD activates ↓ (' + SIM.cfg.thresh + ' remaining)', W - padR, thY - 3);
+      ctx.fillText('SD activates ↓ (' + SIM.cfg.thresh + ' remaining)', padL + plotW, thY - 3);
       ctx.restore();
     }
   }
@@ -161,27 +174,29 @@ function drawPane(canvasId, state, isTLT) {
     ctx.fillRect(padL, y, progW, barH);
   }
 
+  ctx.restore(); /* Remove clip */
+
   /* Bottom axis ticks and labels */
+  var tickCount = plotW > 200 ? 4 : 3;
   ctx.fillStyle = '#9aa0b0';
   ctx.font = '9px JetBrains Mono';
   ctx.textAlign = 'center';
-  for (var j = 0; j <= 4; j++) {
-    var xp = padL + plotW * j / 4;
-    /* Tick mark */
-    ctx.strokeStyle = '#2e3444';
+  for (var j = 0; j <= tickCount; j++) {
+    var xp = padL + plotW * j / tickCount;
+    ctx.strokeStyle = '#3a4050';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(xp, padT + plotH);
     ctx.lineTo(xp, padT + plotH + 4);
     ctx.stroke();
-    ctx.fillText(Math.round(SIM.cfg.maxLen * j / 4 / 1000) + 'K', xp, padT + plotH + 14);
+    ctx.fillText(Math.round(SIM.cfg.maxLen * j / tickCount / 1000) + 'K', xp, padT + plotH + 14);
   }
 
   /* X-axis title */
   ctx.fillStyle = '#9aa0b0';
   ctx.font = '9px JetBrains Mono';
   ctx.textAlign = 'center';
-  ctx.fillText('Output Tokens →', padL + plotW / 2, H - 2);
+  ctx.fillText('Output Tokens →', padL + plotW / 2, H - 4);
 }
 
 function updateKPIs() {
