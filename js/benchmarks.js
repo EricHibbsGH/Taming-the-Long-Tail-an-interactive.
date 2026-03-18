@@ -76,7 +76,7 @@ registerDeferred('benchmarks', function () {
     type: 'bar',
     data: {
       labels: ['Single Strategy', 'Vanilla Multiple', 'Bucketed (Ours)'],
-      datasets: [{ label: 'GB', data: [7.81, 30.39, 10.69], backgroundColor: [C.text3, C.red, C.accent], borderRadius: 3 }]
+      datasets: [{ label: 'GB', data: [7.81, 30.39, 10.69], backgroundColor: ['rgba(93,99,114,0.55)', 'rgba(93,99,114,0.4)', C.accent], borderRadius: 3 }]
     },
     options: {
       indexAxis: 'y',
@@ -96,7 +96,7 @@ registerDeferred('benchmarks', function () {
       datasets: [{
         label: 'ms / samp\u00b7s\u207b\u00b9',
         data: [893, 280, 97, 13.3, 29.6],
-        backgroundColor: [C.orange, C.orange2, C.green, C.purple, C.accent],
+        backgroundColor: ['rgba(93,99,114,0.5)', 'rgba(93,99,114,0.5)', C.accent, 'rgba(93,99,114,0.5)', C.accent],
         borderRadius: 3
       }]
     },

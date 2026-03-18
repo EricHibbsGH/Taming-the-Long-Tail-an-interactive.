@@ -34,9 +34,9 @@
     data: {
       labels: ['Qwen-7B', 'DS-7B', 'Qwen-32B', 'Llama-70B', 'Geomean'],
       datasets: [
-        { label: 'Open-R1', data: [0.25, 0.07, 0.22, null, 0.18], backgroundColor: C.text3, borderRadius: 3 },
-        { label: 'VeRL', data: [1.00, 1.00, 1.00, 1.00, 1.00], backgroundColor: C.orange, borderRadius: 3 },
-        { label: 'TLT-Base', data: [1.41, 1.31, 1.54, 1.38, 1.42], backgroundColor: C.purple, borderRadius: 3 },
+        { label: 'Open-R1', data: [0.25, 0.07, 0.22, null, 0.18], backgroundColor: 'rgba(93,99,114,0.5)', borderRadius: 3 },
+        { label: 'VeRL (baseline)', data: [1.00, 1.00, 1.00, 1.00, 1.00], backgroundColor: 'rgba(148,163,184,0.55)', borderRadius: 3 },
+        { label: 'TLT-Base', data: [1.41, 1.31, 1.54, 1.38, 1.42], backgroundColor: 'rgba(59,130,246,0.45)', borderRadius: 3 },
         { label: 'TLT (Ours)', data: [1.86, 1.86, 2.12, 1.71, 1.76], backgroundColor: C.accent, borderRadius: 3 }
       ]
     },
@@ -191,11 +191,19 @@
     { w: [20, 8, 7], sd: 4, dt: 41 }
   ];
 
+  /* Restrained semantic color palette for timeline */
+  var TL_ROLLOUT  = C.accent;                      /* blue  — active rollout decoding   */
+  var TL_SD       = 'rgba(96,165,250,0.65)';       /* light blue — SD-accelerated phase */
+  var TL_DRAFTER  = 'rgba(96,165,250,0.4)';        /* faint blue — drafter training     */
+  var TL_INF      = 'rgba(148,163,184,0.55)';      /* neutral — inference/prefill       */
+  var TL_TRAIN    = 'rgba(100,116,139,0.5)';       /* darker neutral — RL weight update */
+  var TL_IDLE     = 'rgba(239,68,68,0.28)';        /* red — idle/wasted compute         */
+
   /* Legend */
   var leg = document.createElement('div');
-  leg.style.cssText = 'display:flex;gap:10px;font-size:9px;font-family:var(--mono);color:var(--text3);margin-bottom:2px;flex-shrink:0';
-  [['Rollout', C.accent], ['SD Accel', C.purple2], ['Drafter Train', C.cyan], ['Inference', C.green], ['RL Train', C.orange], ['Idle (wasted)', 'rgba(239,68,68,0.4)']].forEach(function (p) {
-    leg.innerHTML += '<span><i style="display:inline-block;width:7px;height:7px;border-radius:2px;background:' + p[1] + ';margin-right:2px;vertical-align:middle"></i>' + p[0] + '</span>';
+  leg.style.cssText = 'display:flex;gap:10px;font-size:9px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;flex-shrink:0;flex-wrap:wrap';
+  [['Rollout', TL_ROLLOUT], ['SD Accel', TL_SD], ['Drafter Train', TL_DRAFTER], ['Inference', TL_INF], ['RL Train', TL_TRAIN], ['Idle (wasted)', TL_IDLE]].forEach(function (p) {
+    leg.innerHTML += '<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:' + p[1] + ';margin-right:3px;vertical-align:middle"></i>' + p[0] + '</span>';
   });
   body.appendChild(leg);
 
@@ -219,21 +227,21 @@
         var track = document.getElementById(id);
         if (!track) return;
         var left = 0;
-        addSeg(track, left, row.w[0], C.accent); left += row.w[0];
-        if (isTLT && row.dt > 0) addSeg(track, left, row.dt, C.cyan, .6);
-        if (isTLT && row.sd > 0) addSeg(track, row.w[0] - row.sd, row.sd, C.purple2, .7);
-        if (!isTLT && row.idle > 0) { addSeg(track, left, row.idle, 'rgba(239,68,68,0.18)'); left += row.idle; }
+        addSeg(track, left, row.w[0], TL_ROLLOUT); left += row.w[0];
+        if (isTLT && row.dt > 0) addSeg(track, left, row.dt, TL_DRAFTER);
+        if (isTLT && row.sd > 0) addSeg(track, row.w[0] - row.sd, row.sd, TL_SD);
+        if (!isTLT && row.idle > 0) { addSeg(track, left, row.idle, TL_IDLE); left += row.idle; }
         var infL = isTLT ? row.w[0] + Math.max(row.dt || 0, 0) : left;
-        addSeg(track, Math.min(infL, 86), row.w[1], C.green);
-        addSeg(track, Math.min(infL, 86) + row.w[1], row.w[2], C.orange);
+        addSeg(track, Math.min(infL, 86), row.w[1], TL_INF);
+        addSeg(track, Math.min(infL, 86) + row.w[1], row.w[2], TL_TRAIN);
       });
     }, 250);
   }
 
-  function addSeg(track, left, width, color, opacity) {
+  function addSeg(track, left, width, color) {
     var s = document.createElement('div');
     s.className = 'tl-seg';
-    s.style.cssText = 'left:' + left + '%;width:0;background:' + color + ';' + (opacity ? 'opacity:' + opacity : '');
+    s.style.cssText = 'left:' + left + '%;width:0;background:' + color;
     track.appendChild(s);
     requestAnimationFrame(function () { s.style.width = width + '%'; });
   }
