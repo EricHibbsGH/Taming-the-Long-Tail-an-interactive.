@@ -118,10 +118,10 @@ table.data .num{text-align:right;font-variant-numeric:tabular-nums}
 table.data .hi{color:var(--accent2);font-weight:600}
 
 /* ── TIMELINE ── */
-.timeline{display:flex;flex-direction:column;gap:2px}
-.tl-row{display:flex;align-items:center;gap:5px;height:18px}
-.tl-label{width:28px;font-size:9px;font-family:var(--mono);color:var(--text3);text-align:right;flex-shrink:0}
-.tl-track{flex:1;height:14px;background:var(--surface2);border-radius:3px;position:relative;overflow:hidden}
+.timeline{display:flex;flex-direction:column;gap:1px}
+.tl-row{display:flex;align-items:center;gap:4px}
+.tl-label{width:22px;font-size:8px;font-family:var(--mono);color:var(--text3);text-align:right;flex-shrink:0}
+.tl-track{flex:1;background:var(--surface2);border-radius:2px;position:relative;overflow:hidden;min-height:8px}
 .tl-seg{position:absolute;top:1px;bottom:1px;border-radius:2px;transition:width .5s ease}
 
 /* ── SIMULATOR ── */

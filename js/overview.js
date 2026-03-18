@@ -182,7 +182,7 @@
  */
 (function () {
   var body = document.getElementById('timelineBody');
-  body.style.cssText = 'display:flex;flex-direction:column;gap:6px;overflow:hidden;padding:2px 0';
+  body.style.cssText = 'display:flex;flex-direction:column;gap:3px;overflow:hidden;padding:2px 0';
 
   /* Semantic palette — blue family for TLT work, neutral for standard RL phases */
   var TL_ROLLOUT = 'rgba(59,130,246,0.9)';     /* solid blue — active rollout          */
@@ -203,7 +203,7 @@
 
   /* Legend */
   var leg = document.createElement('div');
-  leg.style.cssText = 'display:flex;gap:12px;font-size:9px;font-family:var(--mono);color:var(--text3);flex-shrink:0;flex-wrap:wrap;margin-bottom:2px';
+  leg.style.cssText = 'display:flex;gap:8px;font-size:8px;font-family:var(--mono);color:var(--text3);flex-shrink:0;flex-wrap:wrap';
   [
     ['Rollout',        TL_ROLLOUT],
     ['Drafter Train',  TL_DRAFTER],
@@ -211,20 +211,22 @@
     ['RL Train',       TL_TRAIN],
     ['Idle (wasted)',  'rgba(255,255,255,0.06)']
   ].forEach(function (p) {
-    var swatch = 'display:inline-block;width:9px;height:9px;border-radius:2px;background:' + p[1] + ';margin-right:3px;vertical-align:middle;' + (p[0] === 'Idle (wasted)' ? 'border:1px solid rgba(255,255,255,0.12)' : '');
+    var swatch = 'display:inline-block;width:8px;height:8px;border-radius:2px;background:' + p[1] + ';margin-right:2px;vertical-align:middle;' + (p[0] === 'Idle (wasted)' ? 'border:1px solid rgba(255,255,255,0.12)' : '');
     leg.innerHTML += '<span><i style="' + swatch + '"></i>' + p[0] + '</span>';
   });
   body.appendChild(leg);
 
   function buildSection(title, rollouts, sync, inf, train, isTLT) {
     var wrap = document.createElement('div');
-    wrap.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column;gap:1px';
-    wrap.innerHTML = '<div style="font-size:9px;font-weight:600;color:var(--text2);letter-spacing:.3px;text-transform:uppercase;font-family:var(--mono);margin-bottom:2px">' + title + '</div>';
+    wrap.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column';
+    wrap.innerHTML = '<div style="font-size:8px;font-weight:700;color:var(--text2);letter-spacing:.4px;text-transform:uppercase;font-family:var(--mono);flex-shrink:0;padding:1px 0">' + title + '</div>';
 
     var tl = document.createElement('div');
     tl.className = 'timeline';
+    tl.style.cssText = 'flex:1;min-height:0;justify-content:space-evenly';
     rollouts.forEach(function (_, i) {
       var row = document.createElement('div'); row.className = 'tl-row';
+      row.style.cssText = 'flex:1;min-height:0';
       row.innerHTML = '<div class="tl-label">W' + (i + 1) + '</div><div class="tl-track" id="tl_' + title.replace(/\W/g,'') + '_' + i + '"></div>';
       tl.appendChild(row);
     });
