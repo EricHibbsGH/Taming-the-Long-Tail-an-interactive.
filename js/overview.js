@@ -9,7 +9,7 @@
   var geoAnnotation = {
     id: 'geoAnnotation',
     afterDraw: function (chart) {
-      var meta = chart.getDatasetMeta(3); /* TLT (Ours) dataset */
+      var meta = chart.getDatasetMeta(3); /* TLT (MIT) dataset */
       if (!meta || !meta.data || meta.data.length < 5) return;
       var bar = meta.data[4]; /* Geomean bar */
       if (!bar) return;
@@ -37,7 +37,7 @@
         { label: 'Open-R1', data: [0.25, 0.07, 0.22, null, 0.18], backgroundColor: 'rgba(93,99,114,0.5)', borderRadius: 3 },
         { label: 'VeRL (baseline)', data: [1.00, 1.00, 1.00, 1.00, 1.00], backgroundColor: 'rgba(148,163,184,0.55)', borderRadius: 3 },
         { label: 'TLT-Base', data: [1.41, 1.31, 1.54, 1.38, 1.42], backgroundColor: 'rgba(59,130,246,0.45)', borderRadius: 3 },
-        { label: 'TLT (Ours)', data: [1.76, 1.71, 2.12, 1.86, 1.86], backgroundColor: C.accent, borderRadius: 3 }
+        { label: 'TLT (MIT)', data: [1.76, 1.71, 2.12, 1.86, 1.86], backgroundColor: C.accent, borderRadius: 3 }
       ]
     },
     options: {
@@ -261,5 +261,5 @@
   }
 
   buildSection('Vanilla RL',   vanillaRollouts, V_SYNC, V_INF, V_TRAIN, false);
-  buildSection('TLT (Ours)',   tltRollouts,     T_SYNC, T_INF, T_TRAIN, true);
+  buildSection('TLT (MIT)',   tltRollouts,     T_SYNC, T_INF, T_TRAIN, true);
 })();

@@ -71,7 +71,7 @@ function updateCaseStudy() {
       '<span class="cs-lbl">GPU-Hrs</span><span>' + gpuHBase.toFixed(0) + '</span>' +
       '<span class="cs-lbl">Cost</span><span>' + fmt$(costBase) + '</span>' +
     '</div>' +
-    '<div class="cs-section" style="color:' + C.accent2 + '">TLT (Ours)</div>' +
+    '<div class="cs-section" style="color:' + C.accent2 + '">TLT (MIT)</div>' +
     '<div class="cs-grid">' +
       '<span class="cs-lbl">Step Time</span><span>' + stepTLT.toFixed(1) + ' min</span>' +
       '<span class="cs-lbl">Total</span><span>' + hrsTLT.toFixed(1) + ' hrs (' + (hrsTLT / 24).toFixed(1) + 'd)</span>' +

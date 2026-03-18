@@ -75,7 +75,7 @@ registerDeferred('benchmarks', function () {
   new Chart(document.getElementById('chartCGMem'), {
     type: 'bar',
     data: {
-      labels: ['Single Strategy', 'Vanilla Multiple', 'Bucketed (Ours)'],
+      labels: ['Single Strategy', 'Vanilla Multiple', 'Bucketed (MIT)'],
       datasets: [{ label: 'GB', data: [7.81, 30.39, 10.69], backgroundColor: ['rgba(93,99,114,0.55)', 'rgba(93,99,114,0.4)', C.accent], borderRadius: 3 }]
     },
     options: {
