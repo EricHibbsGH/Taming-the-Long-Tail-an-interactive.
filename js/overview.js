@@ -146,7 +146,7 @@
       ctx.font = '600 8px JetBrains Mono';
       ctx.textAlign = 'left';
       var midY = (pt0.y + pt1.y) / 2;
-      ctx.fillText('+22%', pt0.x + 12, midY + 3);
+      ctx.fillText('+14%', pt0.x + 12, midY + 3);
       ctx.restore();
     }
   };
@@ -156,8 +156,8 @@
     data: {
       labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
       datasets: [
-        { label: 'Vanilla Drafter', data: [92, 75, 55, 40, 30, 22, 15, 10], borderColor: C.orange, backgroundColor: 'rgba(245,158,11,.08)', fill: true, tension: .3, pointRadius: 3, pointBackgroundColor: C.orange, borderWidth: 1.5 },
-        { label: 'Adaptive Drafter', data: [96, 90, 80, 70, 60, 50, 40, 32], borderColor: C.accent, backgroundColor: 'rgba(59,130,246,.08)', fill: true, tension: .3, pointRadius: 3, pointBackgroundColor: C.accent, borderWidth: 1.5 }
+        { label: 'Vanilla Drafter', data: [92, 72, 52, 36, 24, 16, 10, 6], borderColor: C.orange, backgroundColor: 'rgba(245,158,11,.08)', fill: true, tension: .3, pointRadius: 3, pointBackgroundColor: C.orange, borderWidth: 1.5 },
+        { label: 'Adaptive Drafter', data: [96, 88, 78, 65, 50, 38, 28, 20], borderColor: C.accent, backgroundColor: 'rgba(59,130,246,.08)', fill: true, tension: .3, pointRadius: 3, pointBackgroundColor: C.accent, borderWidth: 1.5 }
       ]
     },
     options: {
