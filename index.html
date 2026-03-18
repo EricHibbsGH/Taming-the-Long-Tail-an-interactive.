@@ -24,7 +24,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=3">
+<link rel="stylesheet" href="css/styles.css?v=4">
 </head>
 <body>
 <div class="app">
@@ -359,21 +359,8 @@
             </div>
           </div>
 
-          <!-- Bottom-left: Key Results -->
-          <div class="card anim-in d2" style="min-height:0;overflow:hidden">
-            <div class="card-head"><h3>Key Results</h3></div>
-            <div class="card-body">
-              <div class="kr-grid kr-grid-2x2">
-                <div class="kr-item"><span class="kr-val">1.76×</span><span class="kr-desc">Geomean E2E training speedup over VeRL baseline</span></div>
-                <div class="kr-item"><span class="kr-val">2.12×</span><span class="kr-desc">Peak speedup on Qwen-32B across 4 nodes</span></div>
-                <div class="kr-item"><span class="kr-val">3.22×</span><span class="kr-desc">Best per-GPU speedup (RTX 3090) across tested hardware</span></div>
-                <div class="kr-item"><span class="kr-val">+42%</span><span class="kr-desc">Drafter accept-length gain after RL training completes</span></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom-right: Design Principles + Citation -->
-          <div class="card anim-in d3" style="min-height:0;overflow:hidden">
+          <!-- Bottom: Design Principles + Citation (full width) -->
+          <div class="card anim-in d2" style="min-height:0;overflow:hidden;grid-column:1/-1">
             <div class="card-head"><h3>Design Principles &amp; Citation</h3></div>
             <div class="card-body meth-content">
               <div class="dp-list" style="margin-bottom:14px">
