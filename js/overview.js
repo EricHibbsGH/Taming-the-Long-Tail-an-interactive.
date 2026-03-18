@@ -182,7 +182,7 @@
  */
 (function () {
   var body = document.getElementById('timelineBody');
-  body.style.cssText = 'display:flex;flex-direction:column;gap:3px;overflow:hidden;padding:2px 0';
+  body.style.cssText = 'display:flex;flex-direction:column;gap:4px;overflow-y:auto;padding:2px 0';
 
   /* Semantic palette — blue family for TLT work, neutral for standard RL phases */
   var TL_ROLLOUT = 'rgba(59,130,246,0.9)';     /* solid blue — active rollout          */
@@ -203,7 +203,7 @@
 
   /* Legend */
   var leg = document.createElement('div');
-  leg.style.cssText = 'display:flex;gap:8px;font-size:8px;font-family:var(--mono);color:var(--text3);flex-shrink:0;flex-wrap:wrap';
+  leg.style.cssText = 'display:flex;gap:8px;font-size:8px;font-family:var(--mono);color:var(--text3);flex-shrink:0;flex-wrap:wrap;margin-bottom:2px';
   [
     ['Rollout',        TL_ROLLOUT],
     ['Drafter Train',  TL_DRAFTER],
@@ -217,21 +217,23 @@
   body.appendChild(leg);
 
   function buildSection(title, rollouts, sync, inf, train, isTLT) {
-    var wrap = document.createElement('div');
-    wrap.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column';
-    wrap.innerHTML = '<div style="font-size:8px;font-weight:700;color:var(--text2);letter-spacing:.4px;text-transform:uppercase;font-family:var(--mono);flex-shrink:0;padding:1px 0">' + title + '</div>';
+    var section = document.createElement('div');
+    section.className = 'tl-section';
+
+    var heading = document.createElement('div');
+    heading.className = 'tl-section-title';
+    heading.textContent = title;
+    section.appendChild(heading);
 
     var tl = document.createElement('div');
     tl.className = 'timeline';
-    tl.style.cssText = 'flex:1;min-height:0;justify-content:space-evenly';
     rollouts.forEach(function (_, i) {
       var row = document.createElement('div'); row.className = 'tl-row';
-      row.style.cssText = 'flex:1;min-height:0';
       row.innerHTML = '<div class="tl-label">W' + (i + 1) + '</div><div class="tl-track" id="tl_' + title.replace(/\W/g,'') + '_' + i + '"></div>';
       tl.appendChild(row);
     });
-    wrap.appendChild(tl);
-    body.appendChild(wrap);
+    section.appendChild(tl);
+    body.appendChild(section);
 
     setTimeout(function () {
       rollouts.forEach(function (rolloutPct, i) {
