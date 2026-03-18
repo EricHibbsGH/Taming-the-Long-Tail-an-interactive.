@@ -304,9 +304,9 @@
             <div class="card anim-in">
               <div class="card-head"><h3>Paper Overview</h3><span class="badge">ASPLOS '26</span></div>
               <div class="card-body meth-content">
-                <h4 class="meth-title">Taming the Long Tail of RL for LLM Reasoning with Speculative Decoding</h4>
-                <p class="meth-authors">Weizhe Chen, Yichao Fu, Ke Wang, Akvile Lukoseviciute, Lean Wang, Yun Gu, Xupeng Miao, Hao Zhang</p>
-                <p class="meth-affil">MIT &times; NVIDIA &times; ETH Zurich</p>
+                <h4 class="meth-title">Taming the Long-Tail: Efficient Reasoning RL Training with Adaptive Drafter</h4>
+                <p class="meth-authors">Qinghao Hu*, Shang Yang*, Junxian Guo, Xiaozhe Yao, Yujun Lin, Yuxian Gu, Han Cai, Chuang Gan, Ana Klimovic, Song Han</p>
+                <p class="meth-affil">MIT &times; NVIDIA &times; ETH Zurich &times; UMass Amherst &nbsp;&nbsp;· &nbsp; *Equal contribution</p>
                 <div class="meth-abstract">
                   <h5>Abstract</h5>
                   <p>Reinforcement learning (RL) has emerged as a key method for training large language models (LLMs) to solve reasoning tasks. However, RL-based training suffers from a critical bottleneck: the <span class="term" data-tip="A small fraction of requests generating extremely long outputs that bottleneck the entire batch">long-tail problem</span> in rollout generation. A small number of slow-to-complete requests hold up the entire GPU cluster, wasting compute.</p>
@@ -317,14 +317,19 @@
             <div class="card anim-in d1">
               <div class="card-head"><h3>Citation</h3></div>
               <div class="card-body">
-                <pre class="cite-block" id="citeBlock">@inproceedings{chen2026tlt,
-  title     = {Taming the Long Tail of RL for LLM
-               Reasoning with Speculative Decoding},
-  author    = {Chen, Weizhe and Fu, Yichao and Wang, Ke
-               and Lukoseviciute, Akvile and Wang, Lean
-               and Gu, Yun and Miao, Xupeng and Zhang, Hao},
-  booktitle = {ASPLOS},
-  year      = {2026}
+                <pre class="cite-block" id="citeBlock">@inproceedings{hu2026tlt,
+  title     = {Taming the Long-Tail: Efficient Reasoning
+               {RL} Training with Adaptive Drafter},
+  author    = {Hu, Qinghao and Yang, Shang and Guo, Junxian
+               and Yao, Xiaozhe and Lin, Yujun and Gu, Yuxian
+               and Cai, Han and Gan, Chuang and Klimovic, Ana
+               and Han, Song},
+  booktitle = {Proceedings of the 31st ACM International
+               Conference on Architectural Support for
+               Programming Languages and Operating Systems
+               (ASPLOS '26)},
+  year      = {2026},
+  doi       = {10.1145/3779212.3790231}
 }</pre>
                 <button class="btn cite-copy-btn" id="copyCite">Copy BibTeX</button>
               </div>
@@ -332,7 +337,7 @@
           </div>
           <!-- Right: How it works -->
           <div class="meth-right">
-            <div class="card anim-in d2">
+            <div class="card anim-in d2" style="flex:1;min-height:0">
               <div class="card-head"><h3>How TLT Works</h3></div>
               <div class="card-body meth-content">
                 <div class="meth-steps" id="methSteps">

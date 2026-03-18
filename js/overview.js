@@ -63,7 +63,7 @@
     ds.push(Math.max(0, 2.8 * Math.exp(-i / 3.0) + 0.12 * Math.exp(-Math.pow(i - 29, 2) / 6)));
   }
 
-  /* Annotation plugin to mark the long tail */
+  /* Annotation: subtle boundary + label at the long-tail threshold */
   var longTailAnnotation = {
     id: 'longTailAnnotation',
     afterDraw: function (chart) {
@@ -73,28 +73,26 @@
       var tailStart = xScale.getPixelForValue(22);
       if (!tailStart) return;
       ctx.save();
-      /* Red shaded zone for the tail region */
-      ctx.fillStyle = 'rgba(239,68,68,0.07)';
+      /* Very subtle background tint for the tail zone */
+      ctx.fillStyle = 'rgba(239,68,68,0.04)';
       ctx.fillRect(tailStart, area.top, area.right - tailStart, area.bottom - area.top);
-      /* Dashed boundary line */
-      ctx.strokeStyle = 'rgba(239,68,68,0.6)';
-      ctx.setLineDash([4, 3]);
-      ctx.lineWidth = 1.5;
+      /* Thin dashed boundary — neutral, not alarming */
+      ctx.strokeStyle = 'rgba(239,68,68,0.45)';
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(tailStart, area.top);
       ctx.lineTo(tailStart, area.bottom);
       ctx.stroke();
       ctx.setLineDash([]);
-      /* Main label */
-      ctx.fillStyle = C.red2;
-      ctx.font = '700 10px JetBrains Mono';
+      /* Compact label above the line */
+      ctx.fillStyle = 'rgba(248,113,113,0.75)';
+      ctx.font = '600 9px JetBrains Mono';
       ctx.textAlign = 'left';
-      ctx.fillText('\u26a0 Long-Tail Zone', tailStart + 5, area.top + 16);
-      /* Sub-label */
-      ctx.fillStyle = 'rgba(248,113,113,0.7)';
-      ctx.font = '500 8px JetBrains Mono';
-      ctx.fillText('~5% of requests', tailStart + 5, area.top + 28);
-      ctx.fillText('hold up entire batch', tailStart + 5, area.top + 39);
+      ctx.fillText('Long-Tail Zone', tailStart + 5, area.top + 13);
+      ctx.font = '400 8px JetBrains Mono';
+      ctx.fillStyle = 'rgba(248,113,113,0.5)';
+      ctx.fillText('~5% of requests stall the batch', tailStart + 5, area.top + 25);
       ctx.restore();
     }
   };
@@ -104,8 +102,10 @@
     data: {
       labels: labels,
       datasets: [
-        { label: 'Qwen-7B', data: qwen, borderColor: C.accent, backgroundColor: 'rgba(59,130,246,.08)', fill: true, tension: .4, pointRadius: 0, borderWidth: 1.5 },
-        { label: 'DeepSeek-R1-7B', data: ds, borderColor: C.green, backgroundColor: 'rgba(34,197,94,.06)', fill: true, tension: .4, pointRadius: 0, borderWidth: 1.5 }
+        /* Solid line — Qwen-7B */
+        { label: 'Qwen-7B',         data: qwen, borderColor: C.accent,                  backgroundColor: 'transparent', fill: false, tension: .4, pointRadius: 0, borderWidth: 2 },
+        /* Dashed line — DeepSeek, visually distinct without a second fill */
+        { label: 'DeepSeek-R1-7B',  data: ds,   borderColor: 'rgba(148,163,184,0.75)',  backgroundColor: 'transparent', fill: false, tension: .4, pointRadius: 0, borderWidth: 1.5, borderDash: [5, 4] }
       ]
     },
     options: {
@@ -171,71 +171,85 @@
   });
 })();
 
-/* RL Step Timeline — Figure 1b */
+/* RL Step Timeline — Figure 1b
+ *
+ * Design: All workers share a single time axis (0–100%).
+ * Vanilla: Each worker's rollout ends at different times. Early-finishing
+ *   workers sit IDLE (empty track space) until the slowest finishes at 85%.
+ *   Then ALL workers do inference + training together.
+ * TLT: SD shortens the longest rollout to ~44%. Idle GPUs train the drafter
+ *   in parallel. All workers finish inference + training ~41% earlier.
+ */
 (function () {
   var body = document.getElementById('timelineBody');
-  body.style.cssText = 'display:flex;flex-direction:column;justify-content:flex-start;gap:8px;overflow:hidden';
+  body.style.cssText = 'display:flex;flex-direction:column;gap:6px;overflow:hidden;padding:2px 0';
 
-  var vanillaData = [
-    { w: [85, 10, 5], idle: 0 },
-    { w: [65, 10, 5], idle: 20 },
-    { w: [50, 10, 5], idle: 35 },
-    { w: [40, 10, 5], idle: 45 },
-    { w: [30, 10, 5], idle: 55 }
-  ];
-  var tltData = [
-    { w: [55, 8, 7], sd: 10, dt: 0 },
-    { w: [42, 8, 7], sd: 8, dt: 15 },
-    { w: [32, 8, 7], sd: 6, dt: 27 },
-    { w: [25, 8, 7], sd: 5, dt: 35 },
-    { w: [20, 8, 7], sd: 4, dt: 41 }
-  ];
+  /* Semantic palette — blue family for TLT work, neutral for standard RL phases */
+  var TL_ROLLOUT = 'rgba(59,130,246,0.9)';     /* solid blue — active rollout          */
+  var TL_DRAFTER = 'rgba(96,165,250,0.38)';    /* faint blue — opportunistic drafter   */
+  var TL_INF     = 'rgba(148,163,184,0.5)';    /* neutral slate — response prefilling  */
+  var TL_TRAIN   = 'rgba(100,116,139,0.55)';   /* darker slate — weight update         */
+  /* Idle = empty track (--surface2 background) — no colored segment drawn            */
 
-  /* Restrained semantic color palette for timeline */
-  var TL_ROLLOUT  = C.accent;                      /* blue  — active rollout decoding   */
-  var TL_SD       = 'rgba(96,165,250,0.65)';       /* light blue — SD-accelerated phase */
-  var TL_DRAFTER  = 'rgba(96,165,250,0.4)';        /* faint blue — drafter training     */
-  var TL_INF      = 'rgba(148,163,184,0.55)';      /* neutral — inference/prefill       */
-  var TL_TRAIN    = 'rgba(100,116,139,0.5)';       /* darker neutral — RL weight update */
-  var TL_IDLE     = 'rgba(239,68,68,0.28)';        /* red — idle/wasted compute         */
+  /* Sync point: the time at which inference begins for all workers.
+   * Vanilla = 85 (limited by the slowest worker's rollout length).
+   * TLT     = 46 (SD acceleration shrinks the bottleneck ~1.85×).           */
+  var V_SYNC = 85,  V_INF = 8,  V_TRAIN = 7;   /* vanilla: inf+train start at 85%  */
+  var T_SYNC = 46,  T_INF = 8,  T_TRAIN = 7;   /* TLT:     inf+train start at 46%  */
+
+  /* Worker rollout lengths as % of vanilla total step time */
+  var vanillaRollouts = [85, 67, 52, 40, 30];   /* W1 is the long-tail worker        */
+  var tltRollouts     = [46, 36, 28, 22, 17];   /* SD reduces all, especially W1     */
 
   /* Legend */
   var leg = document.createElement('div');
-  leg.style.cssText = 'display:flex;gap:10px;font-size:9px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;flex-shrink:0;flex-wrap:wrap';
-  [['Rollout', TL_ROLLOUT], ['SD Accel', TL_SD], ['Drafter Train', TL_DRAFTER], ['Inference', TL_INF], ['RL Train', TL_TRAIN], ['Idle (wasted)', TL_IDLE]].forEach(function (p) {
-    leg.innerHTML += '<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:' + p[1] + ';margin-right:3px;vertical-align:middle"></i>' + p[0] + '</span>';
+  leg.style.cssText = 'display:flex;gap:12px;font-size:9px;font-family:var(--mono);color:var(--text3);flex-shrink:0;flex-wrap:wrap;margin-bottom:2px';
+  [
+    ['Rollout',        TL_ROLLOUT],
+    ['Drafter Train',  TL_DRAFTER],
+    ['Inference',      TL_INF],
+    ['RL Train',       TL_TRAIN],
+    ['Idle (wasted)',  'rgba(255,255,255,0.06)']
+  ].forEach(function (p) {
+    var swatch = 'display:inline-block;width:9px;height:9px;border-radius:2px;background:' + p[1] + ';margin-right:3px;vertical-align:middle;' + (p[0] === 'Idle (wasted)' ? 'border:1px solid rgba(255,255,255,0.12)' : '');
+    leg.innerHTML += '<span><i style="' + swatch + '"></i>' + p[0] + '</span>';
   });
   body.appendChild(leg);
 
-  function buildSection(label, data, isTLT) {
-    var sec = document.createElement('div');
-    sec.innerHTML = '<div style="font-size:9px;font-weight:600;color:var(--text2);margin-bottom:1px;font-family:var(--mono)">' + label + '</div>';
+  function buildSection(title, rollouts, sync, inf, train, isTLT) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column;gap:1px';
+    wrap.innerHTML = '<div style="font-size:9px;font-weight:600;color:var(--text2);letter-spacing:.3px;text-transform:uppercase;font-family:var(--mono);margin-bottom:2px">' + title + '</div>';
+
     var tl = document.createElement('div');
     tl.className = 'timeline';
-    data.forEach(function (row, i) {
-      var r = document.createElement('div'); r.className = 'tl-row';
-      var id = label.replace(/[^a-zA-Z0-9]/g, '') + 'w' + i;
-      r.innerHTML = '<div class="tl-label">W' + (i + 1) + '</div><div class="tl-track" id="' + id + '"></div>';
-      tl.appendChild(r);
+    rollouts.forEach(function (_, i) {
+      var row = document.createElement('div'); row.className = 'tl-row';
+      row.innerHTML = '<div class="tl-label">W' + (i + 1) + '</div><div class="tl-track" id="tl_' + title.replace(/\W/g,'') + '_' + i + '"></div>';
+      tl.appendChild(row);
     });
-    sec.appendChild(tl);
-    body.appendChild(sec);
+    wrap.appendChild(tl);
+    body.appendChild(wrap);
 
     setTimeout(function () {
-      data.forEach(function (row, i) {
-        var id = label.replace(/[^a-zA-Z0-9]/g, '') + 'w' + i;
-        var track = document.getElementById(id);
+      rollouts.forEach(function (rolloutPct, i) {
+        var track = document.getElementById('tl_' + title.replace(/\W/g,'') + '_' + i);
         if (!track) return;
-        var left = 0;
-        addSeg(track, left, row.w[0], TL_ROLLOUT); left += row.w[0];
-        if (isTLT && row.dt > 0) addSeg(track, left, row.dt, TL_DRAFTER);
-        if (isTLT && row.sd > 0) addSeg(track, row.w[0] - row.sd, row.sd, TL_SD);
-        if (!isTLT && row.idle > 0) { addSeg(track, left, row.idle, TL_IDLE); left += row.idle; }
-        var infL = isTLT ? row.w[0] + Math.max(row.dt || 0, 0) : left;
-        addSeg(track, Math.min(infL, 86), row.w[1], TL_INF);
-        addSeg(track, Math.min(infL, 86) + row.w[1], row.w[2], TL_TRAIN);
+
+        /* Rollout bar */
+        addSeg(track, 0, rolloutPct, TL_ROLLOUT);
+
+        if (isTLT && rolloutPct < sync) {
+          /* Drafter training fills the gap while slower workers finish rollout */
+          addSeg(track, rolloutPct, sync - rolloutPct, TL_DRAFTER);
+        }
+        /* Idle for vanilla is EMPTY — track background shows through (no segment) */
+
+        /* Synchronized inference + training (same start time for all workers) */
+        addSeg(track, sync,       inf,   TL_INF);
+        addSeg(track, sync + inf, train, TL_TRAIN);
       });
-    }, 250);
+    }, 260);
   }
 
   function addSeg(track, left, width, color) {
@@ -246,6 +260,6 @@
     requestAnimationFrame(function () { s.style.width = width + '%'; });
   }
 
-  buildSection('Vanilla RL', vanillaData, false);
-  buildSection('TLT (Ours)', tltData, true);
+  buildSection('Vanilla RL',   vanillaRollouts, V_SYNC, V_INF, V_TRAIN, false);
+  buildSection('TLT (Ours)',   tltRollouts,     T_SYNC, T_INF, T_TRAIN, true);
 })();
