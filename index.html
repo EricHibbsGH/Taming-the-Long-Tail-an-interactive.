@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TLT — Taming the Long-Tail: Adaptive Drafter Dashboard</title>
-<meta name="description" content="Interactive visualization dashboard for the ASPLOS '26 paper: Taming the Long Tail of RL for LLM Reasoning with Speculative Decoding. 1.76× geomean training speedup across 4 models on H100.">
+<meta name="description" content="Interactive visualization dashboard for the ASPLOS '26 paper: Taming the Long Tail of RL for LLM Reasoning with Speculative Decoding. 1.86× geomean training speedup across 4 models on H100.">
 <meta name="author" content="Eric Hibbs">
 
 <!-- Open Graph / LinkedIn -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="TLT — Taming the Long-Tail of RL for LLM Reasoning">
-<meta property="og:description" content="Interactive dashboard for ASPLOS '26: 1.76× geomean speedup via adaptive speculative decoding in RL-based LLM training. Explore heatmaps, simulators, and cost calculators.">
+<meta property="og:description" content="Interactive dashboard for ASPLOS '26: 1.86× geomean speedup via adaptive speculative decoding in RL-based LLM training. Explore heatmaps, simulators, and cost calculators.">
 <meta property="og:image" content="https://repository-images.githubusercontent.com/placeholder-tlt-dashboard.png">
 <meta property="og:site_name" content="TLT Dashboard — ASPLOS 2026">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="TLT — Taming the Long-Tail of RL for LLM Reasoning">
-<meta name="twitter:description" content="Interactive ASPLOS '26 dashboard: 1.76× training speedup via adaptive speculative decoding.">
+<meta name="twitter:description" content="Interactive ASPLOS '26 dashboard: 1.86× training speedup via adaptive speculative decoding.">
 
 <!-- Favicon -->
 <link rel="icon" type="image/gif" href="img/fox.gif">
@@ -61,7 +61,7 @@
     <section class="tab-panel active" id="panel-overview">
       <div class="kpi-strip">
         <div class="kpi"><span class="kpi-label">Peak Speedup</span><span class="kpi-val">2.12&times;</span><span class="kpi-sub">Qwen-32B · H100</span></div>
-        <div class="kpi"><span class="kpi-label">Geo-Mean</span><span class="kpi-val">1.76&times;</span><span class="kpi-sub">4 models · H100</span></div>
+        <div class="kpi"><span class="kpi-label">Geo-Mean</span><span class="kpi-val">1.86&times;</span><span class="kpi-sub">4 models · H100</span></div>
         <div class="kpi"><span class="kpi-label">Rollout Cost</span><span class="kpi-val">~85%</span><span class="kpi-sub">of RL step time</span></div>
         <div class="kpi"><span class="kpi-label">Lossless</span><span class="kpi-val">100%</span><span class="kpi-sub">Math-equiv output</span></div>
         <div class="kpi"><span class="kpi-label">Byproduct</span><span class="kpi-val">Drafter</span><span class="kpi-sub">Deploy-ready</span></div>
@@ -72,7 +72,7 @@
             <div class="card anim-in">
               <div class="card-head"><h3>End-to-End Training Speed (H100)</h3><span class="badge" title="Paper Figure 11 — Normalized end-to-end RL training speed across 4 models vs VeRL baseline">Fig 11</span></div>
               <div class="card-body"><div class="cw"><canvas id="chartE2E"></canvas></div></div>
-              <div class="card-foot f-grn">TLT delivers <b>1.76&times; geomean</b> across all 4 models — peak <b>2.12&times;</b> on Qwen-32B vs VeRL baseline (1.0&times;)</div>
+              <div class="card-foot f-grn">TLT delivers <b>1.86&times; geomean</b> across all 4 models — peak <b>2.12&times;</b> on Qwen-32B vs VeRL baseline (1.0&times;)</div>
             </div>
             <div class="card anim-in d1">
               <div class="card-head"><h3>Rollout Response-Length Distribution</h3><span class="badge badge-fig" title="Paper Figure 1a — Log-normal response length distribution revealing the long-tail bottleneck in RL training">Fig 1a</span></div>

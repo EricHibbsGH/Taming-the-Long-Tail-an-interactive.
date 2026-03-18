@@ -17,11 +17,11 @@ function updateCaseStudy() {
   var seqLen = parseInt(document.getElementById('cs-seqlen').value);
 
   /* Paper data: end-to-end speedups (Table 2, Fig 11) */
-  var modelSU = { 'Qwen2.5-7B': 1.86, 'DeepSeek-R1-7B': 1.86, 'Qwen2.5-32B': 2.12, 'Llama-3.3-70B': 1.71 };
+  var modelSU = { 'Qwen2.5-7B': 1.76, 'DeepSeek-R1-7B': 1.71, 'Qwen2.5-32B': 2.12, 'Llama-3.3-70B': 1.86 };
   var gpuSU = { 'B200': 2.33, 'H100': 2.61, 'A100': 2.79, 'RTX 5090': 2.91, 'RTX 4090': 2.87, 'RTX 3090': 3.22 };
   var gpuCost = { 'B200': 4.50, 'H100': 3.00, 'A100': 2.00, 'RTX 5090': 1.80, 'RTX 4090': 1.50, 'RTX 3090': 1.20 };
 
-  var su = modelSU[model] || 1.76;
+  var su = modelSU[model] || 1.86;
   var sdSU = gpuSU[gpu] || 2.61;
   var costHr = gpuCost[gpu] || 3.00;
 

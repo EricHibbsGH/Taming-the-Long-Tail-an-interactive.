@@ -19,7 +19,7 @@
       ctx.fillStyle = C.accent2;
       ctx.font = '600 9px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText('1.76\xd7', x, y - 6);
+      ctx.fillText('1.86\xd7', x, y - 6);
       /* Subtle glow under geomean bar */
       ctx.shadowColor = 'rgba(59,130,246,.3)';
       ctx.shadowBlur = 8;
@@ -34,10 +34,10 @@
     data: {
       labels: ['Qwen-7B', 'DS-7B', 'Qwen-32B', 'Llama-70B', 'Geomean'],
       datasets: [
-        { label: 'Open-R1', data: [0.18, 0.07, 0.25, 0.22, null], backgroundColor: 'rgba(93,99,114,0.5)', borderRadius: 3 },
+        { label: 'Open-R1', data: [0.25, 0.07, 0.22, null, 0.18], backgroundColor: 'rgba(93,99,114,0.5)', borderRadius: 3 },
         { label: 'VeRL (baseline)', data: [1.00, 1.00, 1.00, 1.00, 1.00], backgroundColor: 'rgba(148,163,184,0.55)', borderRadius: 3 },
         { label: 'TLT-Base', data: [1.41, 1.31, 1.54, 1.38, 1.42], backgroundColor: 'rgba(59,130,246,0.45)', borderRadius: 3 },
-        { label: 'TLT (Ours)', data: [1.86, 1.86, 2.12, 1.71, 1.76], backgroundColor: C.accent, borderRadius: 3 }
+        { label: 'TLT (Ours)', data: [1.76, 1.71, 2.12, 1.86, 1.86], backgroundColor: C.accent, borderRadius: 3 }
       ]
     },
     options: {
