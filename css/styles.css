@@ -187,9 +187,10 @@ tr.opt-row>td{background:rgba(59,130,246,.05)}tr.opt-row>td:first-child{border-l
 .card-foot b{font-weight:600;color:var(--text)}.card-foot.f-acc b,.card-foot.f-grn b,.card-foot.f-orn b{color:var(--text)}
 
 /* ── METHODOLOGY TAB ── */
-.meth-layout{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:8px;flex:1;min-height:0;overflow:hidden}
-.meth-left,.meth-right{display:flex;flex-direction:column;gap:8px;overflow:hidden;min-height:0}
-.meth-content{padding:10px 12px;overflow:auto}
+.meth-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;flex:1;min-height:0;overflow:hidden}
+.meth-grid>.card{display:flex;flex-direction:column;min-height:0}
+.meth-grid>.card>.card-body{flex:1;min-height:0;overflow:auto}
+.meth-content{padding:10px 12px}
 .meth-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:6px}
 .meth-authors{font-size:10px;color:var(--text2);font-family:var(--mono);line-height:1.4;margin-bottom:2px}
 .meth-affil{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:8px}
@@ -199,10 +200,11 @@ tr.opt-row>td{background:rgba(59,130,246,.05)}tr.opt-row>td:first-child{border-l
 /* Key Results grid */
 .meth-keyresults{border-top:1px solid var(--border);padding-top:8px;margin-top:8px}
 .meth-keyresults h5{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent2);margin-bottom:6px;font-weight:600}
-.kr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.kr-item{background:var(--surface2);border-radius:5px;padding:7px 9px;display:flex;flex-direction:column;gap:2px}
-.kr-val{font-size:17px;font-weight:700;color:var(--accent2);font-family:var(--mono);line-height:1}
-.kr-desc{font-size:9.5px;color:var(--text3);line-height:1.4}
+.kr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kr-grid-2x2{grid-template-rows:1fr 1fr;height:100%}
+.kr-item{background:var(--surface2);border-radius:6px;padding:16px 14px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.kr-val{font-size:28px;font-weight:700;color:var(--accent2);font-family:var(--mono);line-height:1}
+.kr-desc{font-size:11px;color:var(--text2);line-height:1.4}
 /* Design Principles list */
 .meth-principles{border-top:1px solid var(--border);padding-top:8px;margin-top:8px}
 .meth-principles h5{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent2);margin-bottom:6px;font-weight:600}
@@ -271,7 +273,7 @@ tr.opt-row>td{background:rgba(59,130,246,.05)}tr.opt-row>td:first-child{border-l
   .grid-row>.card{flex:1 1 calc(50% - 4px);min-height:180px}
   .sim-layout{grid-template-columns:1fr;grid-template-rows:auto 300px}
   .cs-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  .meth-layout{grid-template-columns:1fr;overflow:auto}
+  .meth-grid{grid-template-columns:1fr;grid-template-rows:auto;overflow:auto}
   .innov-grid{grid-template-columns:1fr}
   .insight-strip{flex-wrap:wrap}
   .insight-card{min-width:calc(50% - 4px)}
