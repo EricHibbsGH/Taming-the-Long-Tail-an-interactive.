@@ -312,6 +312,24 @@
                   <p>Reinforcement learning (RL) has emerged as a key method for training large language models (LLMs) to solve reasoning tasks. However, RL-based training suffers from a critical bottleneck: the <span class="term" data-tip="A small fraction of requests generating extremely long outputs that bottleneck the entire batch">long-tail problem</span> in rollout generation. A small number of slow-to-complete requests hold up the entire GPU cluster, wasting compute.</p>
                   <p>TLT introduces an <span class="term" data-tip="SD activates only when active requests fall below a threshold, maximizing throughput during the sparse phase">adaptive speculative decoding</span> strategy that activates a lightweight <span class="term" data-tip="A smaller model trained alongside the main model to predict multiple tokens at once">drafter model</span> only when active requests drop below a configurable threshold. This targets the long-tail phase where GPUs are otherwise idle.</p>
                 </div>
+                <div class="meth-keyresults">
+                  <h5>Key Results</h5>
+                  <div class="kr-grid">
+                    <div class="kr-item"><span class="kr-val">1.76×</span><span class="kr-desc">Geomean E2E training speedup over VeRL baseline</span></div>
+                    <div class="kr-item"><span class="kr-val">2.12×</span><span class="kr-desc">Peak speedup on Qwen-32B across 4 nodes</span></div>
+                    <div class="kr-item"><span class="kr-val">3.22×</span><span class="kr-desc">Best per-GPU speedup (RTX 3090) across tested hardware</span></div>
+                    <div class="kr-item"><span class="kr-val">+42%</span><span class="kr-desc">Drafter accept-length gain after RL training completes</span></div>
+                  </div>
+                </div>
+                <div class="meth-principles">
+                  <h5>Design Principles</h5>
+                  <div class="dp-list">
+                    <div class="dp-item"><span class="dp-label">Lossless</span><span class="dp-desc">Token-level equivalence to standard RL — no accuracy trade-off by construction.</span></div>
+                    <div class="dp-item"><span class="dp-label">Interference-Free</span><span class="dp-desc">Drafter training uses only idle GPU capacity; never contends with rollout or policy update.</span></div>
+                    <div class="dp-item"><span class="dp-label">Automatic</span><span class="dp-desc">Threshold-based activation requires no manual tuning per model or batch configuration.</span></div>
+                    <div class="dp-item"><span class="dp-label">Generalizable</span><span class="dp-desc">Validated across B200, H100, A100, RTX 5090/4090/3090 and 1–8 node cluster scales.</span></div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="card anim-in d1">

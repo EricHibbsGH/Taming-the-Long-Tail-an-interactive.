@@ -193,9 +193,23 @@ tr.opt-row>td{background:rgba(59,130,246,.05)}tr.opt-row>td:first-child{border-l
 .meth-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:6px}
 .meth-authors{font-size:10px;color:var(--text2);font-family:var(--mono);line-height:1.4;margin-bottom:2px}
 .meth-affil{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:8px}
-.meth-abstract{border-top:1px solid var(--border);padding-top:8px}
+.meth-abstract{border-top:1px solid var(--border);padding-top:8px;margin-bottom:0}
 .meth-abstract h5{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent2);margin-bottom:4px;font-weight:600}
 .meth-abstract p{font-size:11px;color:var(--text2);line-height:1.55;margin-bottom:6px}
+/* Key Results grid */
+.meth-keyresults{border-top:1px solid var(--border);padding-top:8px;margin-top:8px}
+.meth-keyresults h5{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent2);margin-bottom:6px;font-weight:600}
+.kr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kr-item{background:var(--surface2);border-radius:5px;padding:7px 9px;display:flex;flex-direction:column;gap:2px}
+.kr-val{font-size:17px;font-weight:700;color:var(--accent2);font-family:var(--mono);line-height:1}
+.kr-desc{font-size:9.5px;color:var(--text3);line-height:1.4}
+/* Design Principles list */
+.meth-principles{border-top:1px solid var(--border);padding-top:8px;margin-top:8px}
+.meth-principles h5{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent2);margin-bottom:6px;font-weight:600}
+.dp-list{display:flex;flex-direction:column;gap:4px}
+.dp-item{display:flex;align-items:baseline;gap:8px;font-size:11px;line-height:1.45}
+.dp-label{font-weight:700;color:var(--text);font-family:var(--mono);font-size:10px;flex-shrink:0;min-width:110px}
+.dp-desc{color:var(--text2)}
 
 /* Glossary tooltips */
 .term{border-bottom:1px dashed var(--accent);color:var(--accent2);cursor:help;position:relative}
