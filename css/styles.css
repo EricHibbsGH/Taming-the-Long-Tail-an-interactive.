@@ -31,7 +31,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* ── TOPBAR ── */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;min-height:56px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-icon{width:28px;height:28px;border-radius:6px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;font-family:var(--mono);box-shadow:0 0 12px rgba(59,130,246,.25)}
+.logo-icon{width:28px;height:28px;border-radius:6px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden}
 @keyframes logoPulse{0%,100%{box-shadow:0 0 12px rgba(59,130,246,.25)}50%{box-shadow:0 0 20px rgba(59,130,246,.4)}}
 .topbar h1{font-size:13px;font-weight:600;letter-spacing:-.3px}
 .topbar h1 span{color:var(--text3);font-weight:400;margin-left:6px;font-size:11px}
