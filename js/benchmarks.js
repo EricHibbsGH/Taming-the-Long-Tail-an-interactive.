@@ -88,23 +88,63 @@ registerDeferred('benchmarks', function () {
     }
   });
 
-  /* Spot Trainer Optimizations — Fig 17 */
+  /* Spot Trainer Optimizations — Fig 17
+   * Two distinct metrics:
+   *   Checkpointing latency (ms): Vanilla 893, Async 280 (3.2×), Selective Async 97 (9.2×)
+   *   Training throughput (samples/s): Vanilla Batching 13.3, Seq Packing 29.6 (2.2×)
+   * We use separate datasets so each bar gets the correct unit in tooltips. */
+  var spotLabels = ['Vanilla Ckpt', 'Async Ckpt', 'Selective Async', 'Vanilla Batch', 'Seq Packing'];
+  var spotLatency     = [893, 280, 97, null, null];
+  var spotThroughput  = [null, null, null, 13.3, 29.6];
   new Chart(document.getElementById('chartOptim'), {
     type: 'bar',
     data: {
-      labels: ['Vanilla Ckpt', 'Async Ckpt', 'Selective Async', 'Vanilla Batch', 'Seq Packing'],
-      datasets: [{
-        label: 'ms / samp\u00b7s\u207b\u00b9',
-        data: [893, 280, 97, 13.3, 29.6],
-        backgroundColor: ['rgba(93,99,114,0.5)', 'rgba(93,99,114,0.5)', C.accent, 'rgba(93,99,114,0.5)', C.accent],
-        borderRadius: 3
-      }]
+      labels: spotLabels,
+      datasets: [
+        {
+          label: 'Latency (ms)',
+          data: spotLatency,
+          backgroundColor: ['rgba(93,99,114,0.5)', 'rgba(93,99,114,0.5)', C.accent],
+          borderRadius: 3,
+          xAxisID: 'x'
+        },
+        {
+          label: 'Throughput (samp/s)',
+          data: spotThroughput,
+          backgroundColor: ['rgba(93,99,114,0.5)', C.accent],
+          borderRadius: 3,
+          xAxisID: 'x2'
+        }
+      ]
     },
     options: {
       indexAxis: 'y',
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function (ctx) {
+              if (ctx.datasetIndex === 0) return ctx.parsed.x + ' ms';
+              return ctx.parsed.x + ' samples/s';
+            }
+          }
+        }
+      },
       scales: {
-        x: { grid: { color: C.grid }, ticks: { font: { size: 9 } } },
+        x: {
+          position: 'bottom',
+          grid: { color: C.grid },
+          ticks: { font: { size: 9 }, callback: function (v) { return v + ' ms'; } },
+          title: { display: false },
+          min: 0, max: 950
+        },
+        x2: {
+          position: 'top',
+          grid: { drawOnChartArea: false },
+          ticks: { font: { size: 9 }, callback: function (v) { return v + ' s/s'; } },
+          title: { display: false },
+          min: 0, max: 35
+        },
         y: { grid: { display: false }, ticks: { font: { size: 9 } } }
       }
     }
