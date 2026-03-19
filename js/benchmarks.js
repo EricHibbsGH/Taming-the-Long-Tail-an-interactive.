@@ -89,33 +89,25 @@ registerDeferred('benchmarks', function () {
   });
 
   /* Spot Trainer Optimizations — Fig 17
-   * Two distinct metrics:
-   *   Checkpointing latency (ms): Vanilla 893, Async 280 (3.2×), Selective Async 97 (9.2×)
-   *   Training throughput (samples/s): Vanilla Batching 13.3, Seq Packing 29.6 (2.2×)
-   * We use separate datasets so each bar gets the correct unit in tooltips. */
-  var spotLabels = ['Vanilla Ckpt', 'Async Ckpt', 'Selective Async', 'Vanilla Batch', 'Seq Packing'];
-  var spotLatency     = [893, 280, 97, null, null];
-  var spotThroughput  = [null, null, null, 13.3, 29.6];
+   * Normalized to speedup (×) on a single axis for clarity.
+   * Checkpointing latency: Vanilla 893ms (1.0×), Async 280ms (3.2×), Selective Async 97ms (9.2×)
+   * Training throughput:   Vanilla Batching 13.3 s/s (1.0×), Seq Packing 29.6 s/s (2.2×) */
+  var spotLabels   = ['Vanilla Ckpt (893 ms)', 'Async Ckpt (280 ms)', 'Selective Async (97 ms)', 'Vanilla Batch (13.3 s/s)', 'Seq Packing (29.6 s/s)'];
+  var spotSpeedup  = [1.0, 3.2, 9.2, 1.0, 2.2];
+  var spotColors   = [
+    'rgba(93,99,114,0.5)', 'rgba(93,99,114,0.5)', C.accent,
+    'rgba(93,99,114,0.5)', C.accent
+  ];
   new Chart(document.getElementById('chartOptim'), {
     type: 'bar',
     data: {
       labels: spotLabels,
-      datasets: [
-        {
-          label: 'Latency (ms)',
-          data: spotLatency,
-          backgroundColor: ['rgba(93,99,114,0.5)', 'rgba(93,99,114,0.5)', C.accent],
-          borderRadius: 3,
-          xAxisID: 'x'
-        },
-        {
-          label: 'Throughput (samp/s)',
-          data: spotThroughput,
-          backgroundColor: ['rgba(93,99,114,0.5)', C.accent],
-          borderRadius: 3,
-          xAxisID: 'x2'
-        }
-      ]
+      datasets: [{
+        label: 'Speedup',
+        data: spotSpeedup,
+        backgroundColor: spotColors,
+        borderRadius: 3
+      }]
     },
     options: {
       indexAxis: 'y',
@@ -123,10 +115,7 @@ registerDeferred('benchmarks', function () {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: function (ctx) {
-              if (ctx.datasetIndex === 0) return ctx.parsed.x + ' ms';
-              return ctx.parsed.x + ' samples/s';
-            }
+            label: function (ctx) { return ctx.parsed.x + '× speedup'; }
           }
         }
       },
@@ -134,16 +123,9 @@ registerDeferred('benchmarks', function () {
         x: {
           position: 'bottom',
           grid: { color: C.grid },
-          ticks: { font: { size: 9 }, maxTicksLimit: 10, callback: function (v) { return v + ' ms'; } },
+          ticks: { font: { size: 9 }, callback: function (v) { return v + '×'; } },
           title: { display: false },
-          min: 0, max: 1000
-        },
-        x2: {
-          position: 'top',
-          grid: { drawOnChartArea: false },
-          ticks: { font: { size: 9 }, callback: function (v) { return v + ' samples/s'; } },
-          title: { display: false },
-          min: 0, max: 35
+          min: 0, max: 10
         },
         y: { grid: { display: false }, ticks: { font: { size: 9 } } }
       }
