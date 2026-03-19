@@ -134,14 +134,14 @@ registerDeferred('benchmarks', function () {
         x: {
           position: 'bottom',
           grid: { color: C.grid },
-          ticks: { font: { size: 9 }, callback: function (v) { return v + ' ms'; } },
+          ticks: { font: { size: 9 }, maxTicksLimit: 10, callback: function (v) { return v + ' ms'; } },
           title: { display: false },
-          min: 0, max: 950
+          min: 0, max: 1000
         },
         x2: {
           position: 'top',
           grid: { drawOnChartArea: false },
-          ticks: { font: { size: 9 }, callback: function (v) { return v + ' s/s'; } },
+          ticks: { font: { size: 9 }, callback: function (v) { return v + ' samples/s'; } },
           title: { display: false },
           min: 0, max: 35
         },
