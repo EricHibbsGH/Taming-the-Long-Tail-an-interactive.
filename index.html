@@ -24,7 +24,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=5">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
 <div class="app">
@@ -51,7 +52,8 @@
     <button class="tab-btn" data-tab="benchmarks">Benchmarks</button>
     <button class="tab-btn" data-tab="case-study">Case Study</button>
     <button class="tab-btn" data-tab="methodology">Methodology</button>
-    <span class="kbd-hint" title="Press 1-6 to switch tabs">⌨ 1–6</span>
+    <button class="tab-btn" data-tab="model-math">Model Math</button>
+    <span class="kbd-hint" title="Press 1-7 to switch tabs">⌨ 1–7</span>
     <a href="https://github.com/EricHibbsGH" target="_blank" class="credit-link">by Eric Hibbs</a>
   </nav>
 
@@ -392,6 +394,252 @@
       </div>
     </section>
 
+    <!--  MODEL MATH  -->
+    <section class="tab-panel" id="panel-model-math">
+      <div class="panel-body mm-panel-body">
+
+        <!-- Section 1: Long-Tail Probability Distribution -->
+        <div class="card anim-in">
+          <div class="card-head"><h3>1 &middot; The Long-Tail as a Probability Distribution</h3><span class="badge badge-fig" title="Paper Figure 1a — response length distribution">Fig 1a</span></div>
+          <div class="card-body mm-card-body">
+            <div class="mm-prose">
+              <p>Let $L_i$ be the response length (tokens) of the $i$-th rollout in a batch of size $B$. Batch completion time is dominated by the slowest request:</p>
+              <p>$$T_{\text{batch}} = \max_{i=1}^{B}\; \frac{L_i}{\text{throughput}_i}$$</p>
+              <p>Even when most $L_i$ are small, the expected maximum $\mathbb{E}[\max_i L_i]$ grows with $B$ whenever the length distribution has a heavy tail. This is the order-statistic argument at the heart of TLT.</p>
+
+              <details class="mm-derivation">
+                <summary>Derivation: Expected Maximum Under Pareto Tail</summary>
+                <div class="mm-deriv-body">
+                  <p>Model the tail of the length distribution as Pareto with shape $\alpha > 1$ and scale $x_{\min}$:</p>
+                  <p>$$F(x) = 1 - \left(\frac{x_{\min}}{x}\right)^{\alpha}, \quad x \geq x_{\min}$$</p>
+                  <p>For $B$ i.i.d. draws, the CDF of the maximum $M_B = \max_i L_i$ is $F_{M_B}(x) = F(x)^B$. The expected maximum is:</p>
+                  <p>$$\mathbb{E}[M_B] = \int_0^{\infty} [1 - F_{M_B}(x)]\,dx = x_{\min} \cdot B^{1/\alpha} \cdot \frac{\alpha}{\alpha - 1}$$</p>
+                  <p>The median of the Pareto distribution is $m = x_{\min} \cdot 2^{1/\alpha}$. Thus:</p>
+                  <p>$$\frac{\mathbb{E}[M_B]}{m} = \frac{B^{1/\alpha}}{2^{1/\alpha}} \cdot \frac{\alpha}{\alpha - 1}$$</p>
+                  <p>For $\alpha = 2$, $B = 128$: the ratio is $\approx 5.7\times$ — the expected slowest request takes nearly 6x longer than the median. This is the mathematical reason GPUs sit idle.</p>
+                </div>
+              </details>
+
+              <p class="mm-assumption">[Assumption] Pareto tail approximation. Paper Fig 1a shows log-normal fit; Pareto is used here for tractable $\mathbb{E}[\max]$ closed form.</p>
+              <p>TLT exploits the gap between $\max_i L_i$ and the median: once most requests finish, the remaining long-tail requests are accelerated via speculative decoding.</p>
+            </div>
+            <div class="mm-widget">
+              <div class="mm-widget-head">Tail Explorer</div>
+              <div class="cfg-row">
+                <span class="ctrl-label">Tail &alpha;</span>
+                <input type="range" id="mm-tail-alpha" min="1.1" max="5.0" step="0.1" value="2.0" style="flex:1">
+                <span class="ctrl-label" id="mm-tail-alpha-val">2.0</span>
+              </div>
+              <div class="cw"><canvas id="chartTailExplorer"></canvas></div>
+              <div class="mm-widget-readout" id="mm-tail-readout"></div>
+            </div>
+          </div>
+          <div class="card-foot">Heavy-tailed length distributions cause $\mathbb{E}[\max]$ to dominate batch time — the core inefficiency TLT targets</div>
+        </div>
+
+        <!-- Section 2: Speculative Decoding Markov Process -->
+        <div class="card anim-in d1">
+          <div class="card-head"><h3>2 &middot; Speculative Decoding as a Markov Acceptance Process</h3><span class="badge badge-fig" title="Paper Figure 13b — SD speedup heatmap">Fig 13b</span></div>
+          <div class="card-body mm-card-body">
+            <div class="mm-prose">
+              <p>Let $\alpha$ be the per-token accept probability and $\gamma$ the draft depth (number of speculative tokens). Each verification step is a geometric trial: the drafter proposes $\gamma$ tokens, the verifier accepts a prefix.</p>
+              <p>The expected number of accepted tokens per step is:</p>
+              <p>$$\mathbb{E}[n] = \frac{1 - \alpha^{\gamma+1}}{1 - \alpha}$$</p>
+
+              <details class="mm-derivation">
+                <summary>Derivation: Geometric Series Argument</summary>
+                <div class="mm-deriv-body">
+                  <p>The probability that exactly $k$ tokens are accepted ($0 \leq k \leq \gamma$) is:</p>
+                  <p>$$P(n = k) = \begin{cases} \alpha^k(1-\alpha) & k < \gamma \\ \alpha^{\gamma} & k = \gamma \end{cases}$$</p>
+                  <p>The expected value is:</p>
+                  <p>$$\mathbb{E}[n] = \sum_{k=0}^{\gamma-1} k\,\alpha^k(1-\alpha) + \gamma\,\alpha^{\gamma}$$</p>
+                  <p>Evaluating the partial geometric series and simplifying yields:</p>
+                  <p>$$\mathbb{E}[n] = \frac{1 - \alpha^{\gamma+1}}{1 - \alpha}$$</p>
+                  <p>At $\alpha = 1$, this reduces to $\gamma + 1$ by L'Hopital's rule (all tokens accepted).</p>
+                </div>
+              </details>
+
+              <p>Define the cost ratio $c = T_{\text{verify}} / T_{\text{draft}}$ — how much more expensive verification is per token than drafting. Each step costs $1$ (verification of one batch) plus $\gamma/c$ (the drafting cost). The speedup over autoregressive decoding is:</p>
+              <p>$$\text{speedup} = \frac{\mathbb{E}[n]}{1 + \gamma / c}$$</p>
+
+              <p class="mm-assumption">[Assumption] Uniform per-token accept rate $\alpha$. Real rates decline with position (Fig 16 shows 96% at depth 1 dropping to 20% at depth 8).</p>
+              <p class="mm-footnote">This closed-form Markov model captures the shape of the speedup surface but underestimates system-level speedup. The Fig 13b peak of 3.66&times; at Depth 12, Verify 64 includes tree-structured verification and KV-cache batching effects beyond this model.</p>
+            </div>
+            <div class="mm-widget">
+              <div class="mm-widget-head">SD Speedup Calculator</div>
+              <div class="cfg-row">
+                <span class="ctrl-label">Accept &alpha;</span>
+                <input type="range" id="mm-sd-alpha" min="0.10" max="0.95" step="0.05" value="0.70" style="flex:1">
+                <span class="ctrl-label" id="mm-sd-alpha-val">0.70</span>
+              </div>
+              <div class="cfg-row">
+                <span class="ctrl-label">Depth &gamma;</span>
+                <input type="range" id="mm-sd-gamma" min="1" max="20" step="1" value="12" style="flex:1">
+                <span class="ctrl-label" id="mm-sd-gamma-val">12</span>
+              </div>
+              <div class="cfg-row">
+                <span class="ctrl-label">Cost c</span>
+                <input type="range" id="mm-sd-c" min="1" max="20" step="0.5" value="10" style="flex:1">
+                <span class="ctrl-label" id="mm-sd-c-val">10.0</span>
+              </div>
+              <div class="cw"><canvas id="chartSDCalc"></canvas></div>
+              <div class="mm-widget-readout" id="mm-sd-readout"></div>
+            </div>
+          </div>
+          <div class="card-foot">The Markov acceptance model gives a closed-form speedup surface — recovers the qualitative shape of Fig 13b</div>
+        </div>
+
+        <!-- Section 3: Adaptive Threshold Optimal Stopping -->
+        <div class="card anim-in d2">
+          <div class="card-head"><h3>3 &middot; The Adaptive Threshold as an Optimal Stopping Rule</h3><span class="badge badge-fig" title="Paper Table 4 — batch-size vs speedup">Tbl 4</span></div>
+          <div class="card-body mm-card-body">
+            <div class="mm-prose">
+              <p>TLT activates SD when active requests drop below a threshold $k^*$. Frame this as a cost-benefit decision: at $k$ active requests, SD has fixed overhead $O_{\text{SD}}$ (context switching, drafter loading) and per-request benefit $b(k)$ that decreases with $k$ because verification contention grows.</p>
+              <p>Model the benefit as exponentially decaying:</p>
+              <p>$$b(k) = b_0 \cdot e^{-k/\tau}$$</p>
+              <p>where $\tau$ controls the decay rate. Activate SD when the total benefit exceeds total overhead:</p>
+              <p>$$k \cdot b(k) \geq O_{\text{SD}}$$</p>
+              <p>The optimal threshold $k^*$ satisfies:</p>
+              <p>$$b(k^*) = \frac{O_{\text{SD}}}{k^*}$$</p>
+
+              <details class="mm-derivation">
+                <summary>Derivation: Why SD Collapses at BS &ge; 16</summary>
+                <div class="mm-deriv-body">
+                  <p>Substituting $b(k) = b_0 e^{-k/\tau}$ into the optimality condition:</p>
+                  <p>$$b_0 e^{-k^*/\tau} = \frac{O_{\text{SD}}}{k^*}$$</p>
+                  <p>This is a transcendental equation solved numerically. As $O_{\text{SD}}$ increases or $b_0$ decreases, $k^*$ shrinks. When $k^* < 1$, SD is never beneficial — the overhead exceeds the per-request gain.</p>
+                  <p>Table 4 shows SD speedup at BS=1 is 3.66&times; but drops to 1.08&times; at BS=32. In the cost model, large batches mean many active requests competing for verification bandwidth, so $b(k)$ is small for large $k$. The threshold $k^*$ falls below the batch size, and SD never activates in the dense phase — exactly TLT's design: activate only in the sparse tail.</p>
+                </div>
+              </details>
+
+              <p class="mm-assumption">[Assumption] Exponential benefit decay $b(k) = b_0 e^{-k/\tau}$ with $\tau = 16$. Not stated in the paper; chosen to match the Table 4 empirical pattern.</p>
+            </div>
+            <div class="mm-widget">
+              <div class="mm-widget-head">Threshold Optimizer</div>
+              <div class="cfg-row">
+                <span class="ctrl-label">Overhead O<sub>SD</sub></span>
+                <input type="range" id="mm-osd" min="0.01" max="0.50" step="0.01" value="0.10" style="flex:1">
+                <span class="ctrl-label" id="mm-osd-val">0.10</span>
+              </div>
+              <div class="cfg-row">
+                <span class="ctrl-label">Benefit b<sub>0</sub></span>
+                <input type="range" id="mm-b0" min="0.10" max="2.00" step="0.05" value="1.00" style="flex:1">
+                <span class="ctrl-label" id="mm-b0-val">1.00</span>
+              </div>
+              <div class="cw"><canvas id="chartThreshOpt"></canvas></div>
+              <div class="mm-widget-readout" id="mm-thresh-readout"></div>
+            </div>
+          </div>
+          <div class="card-foot">The cost model explains Table 4: SD advantage collapses at large batch sizes because verification contention overwhelms the per-request benefit</div>
+        </div>
+
+        <!-- Section 4: Drafter Training Free Byproduct -->
+        <div class="card anim-in d3">
+          <div class="card-head"><h3>4 &middot; Drafter Training as a Free Byproduct</h3><span class="badge badge-fig" title="Paper Figure 16 — adaptive vs vanilla drafter accept rates">Fig 16</span></div>
+          <div class="card-body mm-card-body prose-only">
+            <div class="mm-prose">
+              <p>Let $\theta_t$ be the drafter parameters at RL step $t$ and $\pi_t$ the policy. The drafter minimizes a distillation objective with a non-stationary target:</p>
+              <p>$$\mathcal{L}(\theta_t) = \mathbb{E}_{x \sim \pi_t}\!\left[-\log p_{\theta}(x)\right]$$</p>
+              <p>Because $\pi_t$ changes as RL proceeds, the drafter faces a <em>tracking problem</em>: it must chase a moving distribution. This is distinct from standard distillation, where the teacher is fixed.</p>
+
+              <div class="mm-theorem">
+                <div class="mm-theorem-label">Theorem (Drafter Convergence Condition)</div>
+                <p>Let $\eta_d$ be the drafter's effective learning rate and $\delta_\pi = \|\pi_{t+1} - \pi_t\|_{\text{TV}}$ the per-step policy drift in total variation. If:</p>
+                <p>$$\eta_d \cdot I_t > \delta_\pi$$</p>
+                <p>where $I_t = \mathbb{E}_{x \sim \pi_t}[\|\nabla_\theta \log p_\theta(x)\|^2]$ is the Fisher information of the drafter, then the drafter's accept rate $\alpha_t$ is non-decreasing in expectation.</p>
+              </div>
+
+              <details class="mm-derivation">
+                <summary>Proof Sketch</summary>
+                <div class="mm-deriv-body">
+                  <p>The drafter's KL gap to the policy after one RL step decomposes as:</p>
+                  <p>$$D_{\text{KL}}(\pi_{t+1} \| p_{\theta_{t+1}}) \leq D_{\text{KL}}(\pi_t \| p_{\theta_t}) - \eta_d \cdot I_t + \delta_\pi + O(\eta_d^2)$$</p>
+                  <p>The first two terms represent drafter improvement via gradient descent; the $\delta_\pi$ term represents policy drift working against the drafter. When $\eta_d \cdot I_t > \delta_\pi$, the net movement is toward lower KL, which corresponds to higher accept rate $\alpha_t$ (since accept probability is bounded by $\exp(-D_{\text{KL}})$).</p>
+                  <p>In practice, RL uses small policy updates (PPO clip $\epsilon \approx 0.2$), keeping $\delta_\pi$ small. The drafter trains on fresh rollout data with much larger effective learning rate. This gap — slow policy drift, fast drafter adaptation — is the mathematical explanation for Fig 16: the adaptive drafter holds 32% accept rate at depth 8 vs 6% for vanilla.</p>
+                </div>
+              </details>
+
+              <p class="mm-assumption">[Assumption] Fisher information $I_t$ is approximately constant across steps, and the KL-accept rate relationship $\alpha \approx \exp(-D_{\text{KL}})$ holds locally. Standard in online distillation literature but not explicitly stated in the paper.</p>
+              <p>The key insight: TLT's drafter training is a <em>free byproduct</em> because it runs on GPU capacity that would otherwise be idle during the sparse tail phase. Table 6 shows +42% accept-length gain from RL co-training at zero extra cost.</p>
+            </div>
+          </div>
+          <div class="card-foot">Slow RL updates + fast drafter adaptation = accept rate improves for free over training (Fig 16, Table 6)</div>
+        </div>
+
+        <!-- Section 5: Deriving New Models -->
+        <div class="card anim-in d4">
+          <div class="card-head"><h3>5 &middot; Deriving New Models</h3><span class="badge">Extensions</span></div>
+          <div class="card-body mm-card-body prose-only">
+            <div class="mm-prose">
+              <p>Using the machinery from Sections 1&ndash;4, we derive three concrete TLT variants a reader could implement.</p>
+
+              <div class="mm-variant">
+                <span class="mm-variant-label">Variant A</span>
+                <h5>Variance-Aware Thresholding</h5>
+                <p>Replace the fixed SD threshold $k^*$ with one that depends on the current variance of active request lengths. Define the conditional variance:</p>
+                <p>$$V(t) = \text{Var}(L_i \mid L_i > t)$$</p>
+                <p>where $t$ is the current rollout time. When $V(t)$ is high, the remaining requests are spread out and SD benefits the stragglers disproportionately. When $V(t)$ is low, all remaining requests finish near-simultaneously and SD overhead isn't justified.</p>
+                <p>The adaptive threshold becomes:</p>
+                <p>$$k^*(t) = k_0 \cdot \left(1 + \lambda \cdot \frac{V(t)}{V(0)}\right)$$</p>
+                <p>where $\lambda > 0$ scales the variance sensitivity. This activates SD <em>earlier</em> when length variance is high (more idle GPUs expected) and <em>later</em> when variance is low.</p>
+                <p><strong>Dominance argument:</strong> For any distribution where $V(t)$ increases as the batch drains (heavy tails), the variance-aware threshold activates SD at the same or earlier time as the fixed threshold, reducing expected $T_{\text{batch}}$. The fixed threshold is recovered when $\lambda = 0$.</p>
+                <p><strong>Implementation:</strong> Track running variance of active request lengths. Replace the fixed threshold comparison in the rollout scheduler with $k^*(t)$.</p>
+              </div>
+
+              <div class="mm-variant">
+                <span class="mm-variant-label">Variant B</span>
+                <h5>Multi-Drafter Ensembling</h5>
+                <p>Instead of one drafter chasing $\pi_t$, partition rollouts into $K$ length buckets $\mathcal{B}_1, \ldots, \mathcal{B}_K$ and train a specialized drafter $\theta^{(j)}$ for each bucket. The expected accept length for bucket $j$ under drafter $j$ is:</p>
+                <p>$$\mathbb{E}[n_j] = \frac{1 - \alpha_j^{\gamma+1}}{1 - \alpha_j}, \quad \alpha_j = \mathbb{E}_{x \sim \pi_t | \mathcal{B}_j}[p_{\theta^{(j)}}(x)]$$</p>
+                <p>The total expected accept length across the batch is:</p>
+                <p>$$\mathbb{E}[n_{\text{ens}}] = \sum_{j=1}^{K} w_j \cdot \mathbb{E}[n_j], \quad w_j = \frac{|\mathcal{B}_j|}{B}$$</p>
+                <p>This is maximized when each drafter is trained on its bucket's conditional distribution: $\mathcal{L}_j(\theta^{(j)}) = \mathbb{E}_{x \sim \pi_t | \mathcal{B}_j}[-\log p_{\theta^{(j)}}(x)]$.</p>
+                <p><strong>Optimal assignment:</strong> The drafter-to-request mapping is a classification problem. At inference time, assign request $i$ to drafter $\arg\max_j\, p_{\theta^{(j)}}(x_i)$ using the first few generated tokens as features. This adds $O(K)$ forward passes per request but yields higher $\alpha_j$ per bucket because long and short rollouts have genuinely different token distributions (long rollouts contain more chain-of-thought reasoning tokens).</p>
+                <p><strong>Implementation:</strong> Replace single drafter with $K$ small drafters. Partition training data by response length quantiles. Add a lightweight router (single linear layer on hidden state) for assignment at inference.</p>
+              </div>
+
+              <div class="mm-variant">
+                <span class="mm-variant-label">Variant C</span>
+                <h5>Curriculum-Ordered Rollouts</h5>
+                <p>Use the drafter's own uncertainty to reorder rollouts within a batch, front-loading the ones the drafter handles well so SD kicks in earlier.</p>
+                <p>Define the drafter's confidence for request $i$ after $s$ tokens as:</p>
+                <p>$$c_i(s) = \frac{1}{s}\sum_{t=1}^{s} \max_v\, p_{\theta}(v \mid x_{i,<t})$$</p>
+                <p>The scheduling problem: choose a permutation $\sigma$ of batch indices to minimize expected completion time. Requests where $c_i$ is high (drafter is confident) should be scheduled last — they'll be accelerated efficiently by SD when the batch thins out.</p>
+                <p>The greedy policy assigns priority $\rho_i = \hat{L}_i / c_i(s)$, where $\hat{L}_i$ is the estimated length. Requests with high $\rho$ (long and low-confidence) go first in the dense phase; the drafter-friendly requests are deferred to the sparse phase where SD is active:</p>
+                <p>$$\sigma^* = \text{argsort}_{i}\left(-\frac{\hat{L}_i}{c_i(s)}\right)$$</p>
+                <p>Under the cost model from Section 3, this reduces expected $T_{\text{batch}}$ by concentrating SD benefit on requests where the drafter's $\alpha$ is highest.</p>
+                <p><strong>Implementation:</strong> After generating $s$ prefix tokens (e.g., $s = 32$), compute $c_i$ and $\hat{L}_i$ (from drafter logits), reorder the batch, and resume generation. The reordering cost is $O(B \log B)$ — negligible compared to generation.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-foot">Three actionable extensions — each modifies a specific TLT component with full equations ready for implementation</div>
+        </div>
+
+        <!-- Section 6: Open Problems -->
+        <div class="card anim-in d5">
+          <div class="card-head"><h3>6 &middot; Open Problems</h3></div>
+          <div class="card-body mm-card-body prose-only">
+            <div class="mm-prose">
+              <div class="mm-open-problem">
+                <strong>Sample complexity of online drafter distillation.</strong> What is the sample complexity of $\mathcal{L}(\theta_t)$ as a function of the policy drift rate $\delta_\pi$? The convergence theorem in Section 4 gives a sufficient condition but not a rate. A tight bound would tell practitioners how many rollout samples the drafter needs per RL step to maintain a target accept rate.
+              </div>
+              <div class="mm-open-problem">
+                <strong>Optimal depth-verify tradeoff under non-uniform accept rates.</strong> The Section 2 model assumes constant $\alpha$. In practice, accept rates decline with position (Fig 16). Is there a closed-form optimum for tree depth and verify tokens when $\alpha_k = \alpha_1 \cdot \beta^{k-1}$ for some decay $\beta < 1$? This would unify the heatmap exploration in the SD Strategy Explorer tab with an analytical solution.
+              </div>
+              <div class="mm-open-problem">
+                <strong>Learnable adaptive threshold.</strong> Can $k^*$ be learned end-to-end rather than set by heuristic? Formulate the threshold as a policy $k^*(s_t)$ where $s_t$ is the system state (active requests, GPU utilization, drafter confidence distribution). Train it via a secondary RL loop that minimizes $T_{\text{batch}}$. The challenge is that the reward signal (batch completion time) is delayed and noisy.
+              </div>
+              <div class="mm-open-problem">
+                <strong>Cross-task drafter transfer.</strong> If a drafter is co-trained during RL on math tasks, does its accept rate transfer to code generation tasks with the same base model? The tracking-problem formulation in Section 4 suggests that drafter quality depends on the divergence between $\pi_t$ and the new task distribution — an empirical study with formal bounds would be valuable.
+              </div>
+            </div>
+          </div>
+          <div class="card-foot">Concrete mathematical questions the paper leaves open — each is a potential research contribution</div>
+        </div>
+
+      </div>
+    </section>
+
   </div>
 </div>
 
@@ -399,6 +647,8 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <script src="js/app.js"></script>
 <script src="js/overview.js"></script>
 <script src="js/simulator.js"></script>
@@ -406,11 +656,12 @@
 <script src="js/benchmarks.js"></script>
 <script src="js/casestudy.js"></script>
 <script src="js/methodology.js"></script>
+<script src="js/modelmath.js"></script>
 <script>
 /* Restore active tab from URL hash on load */
 (function () {
   var hash = window.location.hash.replace('#', '');
-  var valid = ['overview','training-sim','sd-explorer','benchmarks','case-study','methodology'];
+  var valid = ['overview','training-sim','sd-explorer','benchmarks','case-study','methodology','model-math'];
   if (hash && valid.indexOf(hash) !== -1) {
     activateTab(hash);
   }

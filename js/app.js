@@ -65,7 +65,7 @@ document.querySelectorAll('.tab-btn').forEach(function (btn) {
 });
 
 /* Keyboard shortcuts: 1-6 for tabs */
-var tabOrder = ['overview', 'training-sim', 'sd-explorer', 'benchmarks', 'case-study', 'methodology'];
+var tabOrder = ['overview', 'training-sim', 'sd-explorer', 'benchmarks', 'case-study', 'methodology', 'model-math'];
 document.addEventListener('keydown', function (e) {
   /* Don't intercept when user is typing in an input */
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;

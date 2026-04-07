@@ -259,6 +259,42 @@ tr.opt-row>td{background:rgba(59,130,246,.05)}tr.opt-row>td:first-child{border-l
 /* Counter animation class */
 .counting{transition:none}
 
+/* ── MODEL MATH TAB ── */
+.mm-panel-body{overflow-y:auto;overflow-x:hidden;flex:1;gap:10px}
+.mm-card-body{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 12px;min-height:0}
+.mm-card-body.prose-only{grid-template-columns:1fr}
+.mm-prose{font-size:11px;color:var(--text2);line-height:1.65;overflow-y:auto}
+.mm-prose p{margin-bottom:6px}
+.mm-prose h5{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent2);margin-bottom:4px;font-weight:600}
+.mm-derivation{border:1px solid var(--border);border-radius:6px;margin:8px 0;overflow:hidden}
+.mm-derivation summary{padding:6px 10px;font-size:10px;font-family:var(--mono);font-weight:600;color:var(--accent2);cursor:pointer;background:var(--surface2);border-bottom:1px solid transparent;transition:background .15s;list-style:none}
+.mm-derivation summary::-webkit-details-marker{display:none}
+.mm-derivation summary::before{content:'\25B8  ';display:inline}
+.mm-derivation[open] summary::before{content:'\25BE  '}
+.mm-derivation[open] summary{border-bottom-color:var(--border)}
+.mm-derivation summary:hover{background:rgba(59,130,246,.06)}
+.mm-deriv-body{padding:8px 10px;font-size:11px;color:var(--text2);line-height:1.65}
+.mm-deriv-body p{margin-bottom:6px}
+.mm-assumption{font-size:9px;font-family:var(--mono);color:var(--orange2);padding:4px 8px;background:rgba(245,158,11,.06);border-left:2px solid var(--orange);border-radius:0 4px 4px 0;margin:6px 0}
+.mm-fig-ref{font-size:9px;color:var(--text3);font-family:var(--mono)}
+.mm-widget{display:flex;flex-direction:column;gap:6px;min-height:0}
+.mm-widget-head{font-size:10px;font-family:var(--mono);font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.mm-widget .cw{min-height:180px}
+.mm-widget-readout{font-family:var(--mono);font-size:10px;color:var(--text2);padding:4px 0;line-height:1.6}
+.mm-widget-readout b{color:var(--accent2);font-weight:600}
+.mm-variant{border-top:1px solid var(--border);padding-top:10px;margin-top:10px}
+.mm-variant:first-child{border-top:none;padding-top:0;margin-top:0}
+.mm-variant-label{display:inline-block;font-size:9px;font-family:var(--mono);font-weight:700;color:#fff;background:var(--accent);padding:1px 6px;border-radius:3px;margin-bottom:4px;letter-spacing:.3px}
+.mm-theorem{border:1px solid var(--accent);border-radius:6px;padding:8px 10px;margin:8px 0;background:rgba(59,130,246,.04)}
+.mm-theorem-label{font-size:9px;font-family:var(--mono);font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.mm-open-problem{padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text2);line-height:1.55}
+.mm-open-problem:last-child{border-bottom:none}
+.mm-open-problem strong{color:var(--text);font-weight:600}
+.mm-footnote{font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+#panel-model-math .katex{color:var(--text)}
+#panel-model-math .katex-display{margin:8px 0;overflow-x:auto;overflow-y:hidden}
+#panel-model-math .katex-display>.katex{color:var(--accent2)}
+
 /* ── RESPONSIVE — TABLET ── */
 @media(max-width:1024px){
   .topbar{padding:0 12px;height:48px;min-height:48px}
@@ -276,6 +312,8 @@ tr.opt-row>td{background:rgba(59,130,246,.05)}tr.opt-row>td:first-child{border-l
   .sim-layout{grid-template-columns:1fr;grid-template-rows:auto 300px}
   .cs-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}
   .meth-grid{grid-template-columns:1fr;grid-template-rows:auto;overflow:auto}
+  .mm-card-body{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .mm-widget .cw{min-height:150px}
   .innov-grid{grid-template-columns:1fr}
   .insight-strip{flex-wrap:wrap}
   .insight-card{min-width:calc(50% - 4px)}
@@ -296,6 +334,9 @@ tr.opt-row>td{background:rgba(59,130,246,.05)}tr.opt-row>td:first-child{border-l
   .card-head h3{font-size:10px}
   .card-foot{font-size:8.5px}
   .insight-card{min-width:100%}
+  .mm-card-body{padding:6px 8px}
+  .mm-widget .cw{min-height:120px}
+  .mm-prose{font-size:10px}
 }
 
 /* ── PRINT STYLES ── */
